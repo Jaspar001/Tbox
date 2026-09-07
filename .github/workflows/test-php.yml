@@ -1,0 +1,23 @@
+name: Test PHP Code
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-php:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: pdo_sqlite, sqlite3
+    
+    - name: Check PHP syntax
+      run: |
+        find . -name "*.php" -exec php -l {} \;
